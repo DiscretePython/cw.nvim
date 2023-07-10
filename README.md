@@ -21,6 +21,17 @@ For example, using Packer
 	end,
 })`
 
+## Configuration
+
+An options table can be passed to the setup function. Valid options are below:
+
+- `profile` string - Changes which AWS profile is used by default. Default: default
+
+## Commands
+
+- `:CWToggle` Toggle the cw overlay
+- `:CWSwitchProfile profile` Switches AWS profile to the passed string
+
 ## Using
 
 The cw overlay can be opened and closed using the :CWToggle command. You may wish
@@ -38,7 +49,8 @@ Press `q` to return to a list of groups. Pressing `q` again will close the overl
 
 - [x] List Log Groups
 - [x] Tail and Follow Log Group
+- [x] Switch AWS Profiles
 - [ ] Tail Log Group
-- [ ] Switch AWS Profiles/Regions
+- [ ] Switch AWS Regions
 - [ ] Configure Date and Time Preferences
 - [ ] Multi-group Tails

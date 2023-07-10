@@ -16,6 +16,7 @@ local select_item = function(bufnr, options, items)
 	M.tail_group(selected_item, bufnr, options)
 end
 
+-- TODO: Allow refreshing this command with a keymap
 function M.list_groups(bufnr, options)
 	utils.clear_buffer(bufnr)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "q", ":CWToggle<cr>", { silent = true })

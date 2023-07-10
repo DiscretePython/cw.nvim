@@ -22,6 +22,7 @@ function M.setup(options)
 	M.initialized = false
 
 	vim.api.nvim_create_user_command("CWToggle", M.toggle, {})
+	vim.api.nvim_create_user_command("CWSwitchProfile", M.switch_profile, { nargs = 1 })
 end
 
 function M.is_configured()
@@ -55,6 +56,16 @@ function M.toggle()
 	else
 		utils.show_cw(M.bufnr, ui)
 	end
+end
+
+function M.switch_profile(inp)
+	local current_bufnr = vim.api.nvim_win_get_buf(0)
+	if current_bufnr == M.bufnr then
+		utils.hide_cw()
+	end
+
+	M.options.profile = inp.fargs[1]
+	M.initialized = false
 end
 
 M.options = nil
