@@ -15,7 +15,7 @@ Install using your preferred plugin manager
 For example, using Packer
 
 `use({
-	"~/.config/nvim/myPlugins/cw.nvim",
+	"DiscretePython/cw.nvim",
 	config = function()
 		require("cw").setup({})
 	end,
