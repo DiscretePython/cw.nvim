@@ -16,7 +16,6 @@ local select_item = function(bufnr, options, items)
 	M.tail_group(selected_item, bufnr, options)
 end
 
--- TODO: Allow refreshing this command with a keymap
 function M.list_groups(bufnr, options)
 	utils.clear_buffer(bufnr)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "q", ":CWToggle<cr>", { silent = true })
@@ -34,7 +33,7 @@ function M.list_groups(bufnr, options)
 		table.insert(groups, s)
 	end
 
-	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, groups)
+	utils.set_buffer_lines(bufnr, groups)
 
 	vim.api.nvim_buf_add_highlight(bufnr, -1, highlight_group, 0, 0, -1)
 
@@ -60,7 +59,7 @@ function M.tail_group(group_name, bufnr, options)
 
 	local job_id = vim.fn.jobstart(command, {
 		on_stdout = function(_, data, _)
-			vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, data)
+			utils.append_buffer_lines(bufnr, data)
 			local line_count = vim.api.nvim_buf_line_count(bufnr)
 			vim.api.nvim_win_set_cursor(winnr, { line_count, 1 })
 		end,

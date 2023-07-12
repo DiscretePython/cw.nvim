@@ -4,6 +4,18 @@ local function round(float)
 	return math.floor(float + 0.5)
 end
 
+function M.set_buffer_lines(bufnr, lines)
+	vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
+	vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+end
+
+function M.append_buffer_lines(bufnr, lines)
+	vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
+	vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, lines)
+	vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
+end
+
 function M.hide_cw()
 	vim.api.nvim_command("hide")
 end
@@ -31,7 +43,7 @@ function M.window_config(width, height, ui)
 end
 
 function M.clear_buffer(bufnr)
-	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, {})
+	M.set_buffer_lines(bufnr, {})
 end
 
 return M
