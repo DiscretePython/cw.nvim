@@ -20,6 +20,12 @@ end
 function M.list_groups(bufnr, options)
 	utils.clear_buffer(bufnr)
 	vim.api.nvim_buf_set_keymap(bufnr, "n", "q", ":CWToggle<cr>", { silent = true })
+	vim.api.nvim_buf_set_keymap(bufnr, "n", "r", "", {
+		silent = true,
+		callback = function()
+			M.list_groups(bufnr, options)
+		end,
+	})
 	local command = string.format("cw ls groups --profile %s", options.profile)
 	local str = vim.fn.system(command)
 

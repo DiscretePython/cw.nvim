@@ -45,6 +45,8 @@ and followed in the overlay.
 
 Press `q` to return to a list of groups. Pressing `q` again will close the overlay.
 
+Pressing `r` will refresh the list of groups.
+
 ## Features
 
 - [x] List Log Groups
