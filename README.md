@@ -26,6 +26,7 @@ For example, using Packer
 An options table can be passed to the setup function. Valid options are below:
 
 - `profile` string - Changes which AWS profile is used by default. Default: default
+- `wrap` boolean - Whether to wrap text in the overlay. Default: false
 
 ## Commands
 

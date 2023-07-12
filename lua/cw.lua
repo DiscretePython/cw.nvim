@@ -10,16 +10,17 @@ local function with_defaults(options)
 
 	return {
 		profile = options.profile or "default",
+		wrap = options.wrap or false,
 	}
 end
 
 function M.setup(options)
+	M.options = with_defaults(options)
+	M.initialized = false
+
 	M.bufnr = vim.api.nvim_create_buf(false, true)
 	vim.api.nvim_buf_set_option(M.bufnr, "buftype", "nofile")
 	vim.api.nvim_buf_set_option(M.bufnr, "bufhidden", "hide")
-
-	M.options = with_defaults(options)
-	M.initialized = false
 
 	vim.api.nvim_create_user_command("CWToggle", M.toggle, {})
 	vim.api.nvim_create_user_command("CWSwitchProfile", M.switch_profile, { nargs = 1 })
@@ -55,6 +56,11 @@ function M.toggle()
 		vim.api.nvim_set_current_win(buf_info.windows[1])
 	else
 		utils.show_cw(M.bufnr, ui)
+	end
+
+	local winnr = vim.fn.bufwinid(M.bufnr)
+	if winnr ~= -1 then
+		vim.api.nvim_win_set_option(winnr, "wrap", M.options.wrap)
 	end
 end
 
