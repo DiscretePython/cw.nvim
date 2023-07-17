@@ -44,13 +44,14 @@ After opening the CW overlay, your default profile's log groups will be listed. 
 the group you wish to tail and follow and press `<CR>`. The log groups output will be tailed
 and followed in the overlay.
 
-Press `q` to return to a list of groups. Pressing `q` again will close the overlay.
-
-Pressing `r` will refresh the list of groups.
+`q` returns to the previous screen.
+`s` lists streams for the highlighted group.
+`r` will refresh the list of groups/streams.
 
 ## Features
 
 - [x] List Log Groups
+- [x] List Log Group Streams
 - [x] Tail and Follow Log Group
 - [x] Switch AWS Profiles
 - [ ] Tail Log Group

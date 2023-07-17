@@ -1,30 +1,15 @@
 local M = {}
 
-local function round(float)
+function M.round(float)
 	return math.floor(float + 0.5)
 end
 
-function M.set_buffer_lines(bufnr, lines)
-	vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
-	vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-	vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-end
-
-function M.append_buffer_lines(bufnr, lines)
-	vim.api.nvim_buf_set_option(bufnr, "modifiable", true)
-	vim.api.nvim_buf_set_lines(bufnr, -1, -1, false, lines)
-	vim.api.nvim_buf_set_option(bufnr, "modifiable", false)
-end
-
-function M.hide_cw()
-	vim.api.nvim_command("hide")
-end
-
-function M.show_cw(bufnr, ui)
-	local width = round(ui.width * 0.5)
-	local height = round(ui.height * 0.5)
-
-	vim.api.nvim_open_win(bufnr, true, M.window_config(width, height, ui))
+function M.reverse_table(x)
+	local n, m = #x, #x / 2
+	for i = 1, m do
+		x[i], x[n - i + 1] = x[n - i + 1], x[i]
+	end
+	return x
 end
 
 function M.window_config(width, height, ui)
@@ -40,10 +25,6 @@ function M.window_config(width, height, ui)
 		focusable = false,
 		border = border,
 	}
-end
-
-function M.clear_buffer(bufnr)
-	M.set_buffer_lines(bufnr, {})
 end
 
 return M
