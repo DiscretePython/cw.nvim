@@ -2,10 +2,9 @@ local config = require("config")
 local buffer = require("buffer")
 local utils = require("utils")
 local commands = require("commands")
+local navigation = require("navigation")
 
 local M = {}
-
-M.initialized = false
 
 function M.setup(options)
 	config.set_with_defaults(options)
@@ -19,9 +18,8 @@ function M.setup(options)
 end
 
 function M.toggle()
-	if not M.initialized then
-		M.initialized = true
-		commands.list_groups()
+	if not navigation.initialized() then
+		navigation.push(commands.list_groups)
 	end
 
 	if not config.is_configured() then
@@ -55,11 +53,11 @@ end
 function M.switch_profile(inp)
 	local current_bufnr = vim.api.nvim_win_get_buf(0)
 	if current_bufnr == buffer.number then
-		utils.hide_cw()
+		buffer.hide()
 	end
 
 	config.values.profile = inp.fargs[1]
-	M.initialized = false
+	navigation.clear()
 end
 
 return M

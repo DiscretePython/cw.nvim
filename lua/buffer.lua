@@ -17,6 +17,13 @@ end
 
 function M.create()
 	M.number = vim.api.nvim_create_buf(false, true)
+
+	vim.api.nvim_create_autocmd("BufLeave", {
+		buffer = M.number,
+		callback = function()
+			M.hide()
+		end,
+	})
 end
 
 function M.set_lines(lines)

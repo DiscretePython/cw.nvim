@@ -1,7 +1,9 @@
 -- TODO: Give some indication of loading for long running commands
+-- TODO: Unmap keymaps when navigating away from each command
 local utils = require("utils")
 local config = require("config")
 local buffer = require("buffer")
+local navigation = require("navigation")
 
 local M = {}
 
@@ -13,19 +15,25 @@ local highlight_selected_item = function()
 	vim.api.nvim_buf_add_highlight(buffer.number, -1, highlight_group, line - 1, 0, -1)
 end
 
-local select_stream = function(items, group, options)
+local select_stream = function(items, group)
 	local line = vim.fn.line(".")
 	local selected_item = items[line]
-	M.tail(group, selected_item, options.on_exit)
+	navigation.push(function()
+		M.tail(group, selected_item)
+	end)
 end
 
-local select_group = function(items, options)
+local select_group = function(items, action)
 	local line = vim.fn.line(".")
 	local selected_item = items[line]
-	if options.action == "tail" then
-		M.tail(selected_item, nil, options.on_exit)
+	if action == "tail" then
+		navigation.push(function()
+			M.tail(selected_item, nil)
+		end)
 	else
-		M.list_streams(selected_item)
+		navigation.push(function()
+			M.list_streams(selected_item)
+		end)
 	end
 end
 
@@ -62,13 +70,13 @@ function M.list_groups()
 	vim.api.nvim_buf_set_keymap(buffer.number, "n", "<CR>", "", {
 		callback = function()
 			vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
-			select_group(setup.selections, { on_exit = M.list_groups, action = "tail" })
+			select_group(setup.selections, "tail")
 		end,
 	})
-	vim.api.nvim_buf_set_keymap(buffer.number, "n", "q", ":CWToggle<cr>", { silent = true })
+	vim.api.nvim_buf_set_keymap(buffer.number, "n", "q", "", { silent = true, callback = navigation.pop })
 	vim.api.nvim_buf_set_keymap(buffer.number, "n", "s", "", {
 		callback = function()
-			select_group(setup.selections, { on_exit = M.list_groups })
+			select_group(setup.selections)
 		end,
 		silent = true,
 	})
@@ -88,15 +96,11 @@ function M.list_streams(group)
 	vim.api.nvim_buf_set_keymap(buffer.number, "n", "<CR>", "", {
 		callback = function()
 			vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
-			select_stream(setup.selections, group, {
-				on_exit = function()
-					M.list_streams(group)
-				end,
-			})
+			select_stream(setup.selections, group)
 		end,
 	})
 	vim.api.nvim_buf_set_keymap(buffer.number, "n", "q", "", {
-		callback = M.list_groups,
+		callback = navigation.pop,
 		silent = true,
 	})
 	vim.api.nvim_buf_set_keymap(buffer.number, "n", "r", "", {
@@ -107,7 +111,7 @@ function M.list_streams(group)
 	})
 end
 
-function M.tail(group, stream, on_exit)
+function M.tail(group, stream)
 	buffer.clear()
 
 	local winnr = vim.fn.bufwinid(buffer.number)
@@ -124,13 +128,8 @@ function M.tail(group, stream, on_exit)
 			local line_count = vim.api.nvim_buf_line_count(buffer.number)
 			vim.api.nvim_win_set_cursor(winnr, { line_count, 1 })
 		end,
-		on_stderr = function(_, data, _)
-			buffer.append_lines(data)
-			local line_count = vim.api.nvim_buf_line_count(buffer.number)
-			vim.api.nvim_win_set_cursor(winnr, { line_count, 1 })
-		end,
 		on_exit = function(_, _)
-			on_exit()
+			navigation.pop()
 		end,
 	})
 
