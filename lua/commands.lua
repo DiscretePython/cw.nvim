@@ -100,10 +100,11 @@ function M.list_streams(group)
 	end, {
 		buffer = buffer.number,
 	})
-	keymap("n", "q", navigation.pop, { silent = true })
-	keymap(buffer.number, "n", "r", function()
+	keymap("n", "q", navigation.pop, { buffer = buffer.number, silent = true })
+	keymap("n", "r", function()
 		M.list_streams(group)
 	end, {
+		buffer = buffer.number,
 		silent = true,
 	})
 end
