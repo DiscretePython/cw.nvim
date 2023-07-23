@@ -1,6 +1,5 @@
 local config = require("config")
 local buffer = require("buffer")
-local utils = require("utils")
 local commands = require("commands")
 local navigation = require("navigation")
 

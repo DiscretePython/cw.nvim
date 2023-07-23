@@ -81,7 +81,7 @@ function M.list_groups()
 		buffer = buffer.number,
 		silent = true,
 	})
-	keymap("n", "r", m.list_groups, {
+	keymap("n", "r", M.list_groups, {
 		silent = true,
 		buffer = buffer.number,
 	})
