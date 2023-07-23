@@ -8,6 +8,7 @@ local navigation = require("navigation")
 local M = {}
 
 local highlight_group = "Visual"
+local keymap = vim.keymap.set
 
 local highlight_selected_item = function()
 	local line = vim.fn.line(".")
@@ -67,22 +68,22 @@ function M.list_groups()
 	local str = vim.fn.system(command)
 
 	local setup = setup_selections(str, {})
-	vim.api.nvim_buf_set_keymap(buffer.number, "n", "<CR>", "", {
-		callback = function()
-			vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
-			select_group(setup.selections, "tail")
-		end,
+	keymap("n", "<CR>", function()
+		vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
+		select_group(setup.selections, "tail")
+	end, {
+		buffer = buffer.number,
 	})
-	vim.api.nvim_buf_set_keymap(buffer.number, "n", "q", "", { silent = true, callback = navigation.pop })
-	vim.api.nvim_buf_set_keymap(buffer.number, "n", "s", "", {
-		callback = function()
-			select_group(setup.selections)
-		end,
+	keymap("n", "q", navigation.pop, { silent = true, buffer = buffer.number })
+	keymap("n", "s", function()
+		select_group(setup.selections)
+	end, {
+		buffer = buffer.number,
 		silent = true,
 	})
-	vim.api.nvim_buf_set_keymap(buffer.number, "n", "r", "", {
+	keymap("n", "r", m.list_groups, {
 		silent = true,
-		callback = M.list_groups,
+		buffer = buffer.number,
 	})
 end
 
@@ -93,21 +94,17 @@ function M.list_streams(group)
 
 	local setup = setup_selections(str, { reverse = true })
 
-	vim.api.nvim_buf_set_keymap(buffer.number, "n", "<CR>", "", {
-		callback = function()
-			vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
-			select_stream(setup.selections, group)
-		end,
+	keymap("n", "<CR>", function()
+		vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
+		select_stream(setup.selections, group)
+	end, {
+		buffer = buffer.number,
 	})
-	vim.api.nvim_buf_set_keymap(buffer.number, "n", "q", "", {
-		callback = navigation.pop,
+	keymap("n", "q", navigation.pop, { silent = true })
+	keymap(buffer.number, "n", "r", function()
+		M.list_streams(group)
+	end, {
 		silent = true,
-	})
-	vim.api.nvim_buf_set_keymap(buffer.number, "n", "r", "", {
-		silent = true,
-		callback = function()
-			M.list_streams(group)
-		end,
 	})
 end
 
@@ -133,12 +130,11 @@ function M.tail(group, stream)
 		end,
 	})
 
-	vim.api.nvim_buf_set_keymap(
-		buffer.number,
+	keymap(
 		"n",
 		"q",
 		":lua vim.api.nvim_call_function('jobstop', {" .. job_id .. "})<cr>",
-		{ silent = true }
+		{ buffer = buffer.number, silent = true }
 	)
 end
 
