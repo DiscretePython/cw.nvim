@@ -10,6 +10,7 @@ function M.set_with_defaults(options)
 	M.values = {
 		profile = options.profile or "default",
 		wrap = options.wrap or false,
+		tail_begin = options.tail_begin or "1h",
 	}
 end
 

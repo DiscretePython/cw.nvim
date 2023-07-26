@@ -27,6 +27,7 @@ An options table can be passed to the setup function. Valid options are below:
 
 - `profile` string - Changes which AWS profile is used by default. Default: default
 - `wrap` boolean - Whether to wrap text in the overlay. Default: false
+- `tail_begin` string - Date/time or human-friendly string to indicate when to start tail, refer to [cw](https://github.com/lucagrulla/cw) for examples. Default: 1h
 
 ## Commands
 
@@ -47,6 +48,8 @@ and followed in the overlay.
 `q` returns to the previous screen.
 `s` lists streams for the highlighted group.
 `r` will refresh the list of groups/streams.
+`<CR>` will tail and follow the highlighted group or stream.
+`t` will tail the highlighted group or stream, beginning from configured `tail_begin`.
 
 ## Features
 
@@ -54,7 +57,7 @@ and followed in the overlay.
 - [x] List Log Group Streams
 - [x] Tail and Follow Log Group
 - [x] Switch AWS Profiles
-- [ ] Tail Log Group
+- [x] Tail Log Group
 - [ ] Switch AWS Regions
 - [ ] Configure Date and Time Preferences
 - [ ] Multi-group Tails
