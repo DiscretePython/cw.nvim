@@ -1,4 +1,3 @@
--- TODO: Give some indication of loading for long running commands
 -- TODO: Unmap keymaps when navigating away from each command
 local utils = require("utils")
 local config = require("config")
@@ -48,12 +47,7 @@ local select_group = function(items, action)
 	end
 end
 
-local setup_selections = function(selections, options)
-	local selections_table = {}
-	for s in selections:gmatch("[^\r\n]+") do
-		table.insert(selections_table, s)
-	end
-
+local setup_selections = function(selections_table, options)
 	if options.reverse then
 		utils.reverse_table(selections_table)
 	end
@@ -74,66 +68,93 @@ end
 
 function M.list_groups()
 	buffer.clear()
+	buffer.set_lines({ "Loading..." })
 	local command = string.format("cw ls groups --profile %s", config.values.profile)
-	local str = vim.fn.system(command)
+	local command_output = {}
 
-	local setup = setup_selections(str, {})
-	keymap("n", "<CR>", function()
-		vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
-		select_group(setup.selections, "tail_and_follow")
-	end, {
-		buffer = buffer.number,
-	})
-	keymap("n", "q", navigation.pop, { silent = true, buffer = buffer.number })
-	keymap("n", "s", function()
-		select_group(setup.selections)
-	end, {
-		buffer = buffer.number,
-		silent = true,
-	})
-	keymap("n", "t", function()
-		select_group(setup.selections, "tail")
-	end, {
-		buffer = buffer.number,
-		silent = true,
-	})
-	keymap("n", "r", M.list_groups, {
-		silent = true,
-		buffer = buffer.number,
+	vim.fn.jobstart(command, {
+		on_stdout = function(_, data)
+			for _, v in ipairs(data) do
+				if v ~= "" then
+					table.insert(command_output, v)
+				end
+			end
+		end,
+		on_exit = function()
+			print(vim.inspect(command_output))
+			buffer.clear()
+			local setup = setup_selections(command_output, {})
+			keymap("n", "<CR>", function()
+				vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
+				select_group(setup.selections, "tail_and_follow")
+			end, {
+				buffer = buffer.number,
+			})
+			keymap("n", "q", navigation.pop, { silent = true, buffer = buffer.number })
+			keymap("n", "s", function()
+				select_group(setup.selections)
+			end, {
+				buffer = buffer.number,
+				silent = true,
+			})
+			keymap("n", "t", function()
+				select_group(setup.selections, "tail")
+			end, {
+				buffer = buffer.number,
+				silent = true,
+			})
+			keymap("n", "r", M.list_groups, {
+				silent = true,
+				buffer = buffer.number,
+			})
+		end,
 	})
 end
 
--- TODO: Do something to stop lockup when there are too many streams. CW doesn't handle this well.
 function M.list_streams(group)
 	buffer.clear()
+	buffer.set_lines({ "Loading..." })
 	local command = string.format("cw ls streams %s --profile %s", group, config.values.profile)
-	local str = vim.fn.system(command)
+	local command_output = {}
 
-	local setup = setup_selections(str, { reverse = true })
+	vim.fn.jobstart(command, {
+		on_stdout = function(_, data)
+			for _, v in ipairs(data) do
+				if v ~= "" then
+					table.insert(command_output, v)
+				end
+			end
+		end,
+		on_exit = function()
+			buffer.clear()
+			local setup = setup_selections(command_output, { reverse = true })
 
-	keymap("n", "<CR>", function()
-		vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
-		select_stream(setup.selections, group)
-	end, {
-		buffer = buffer.number,
-	})
-	keymap("n", "q", navigation.pop, { buffer = buffer.number, silent = true })
-	keymap("n", "t", function()
-		select_stream(setup.selections, group, "tail")
-	end, {
-		buffer = buffer.number,
-		silent = true,
-	})
-	keymap("n", "r", function()
-		M.list_streams(group)
-	end, {
-		buffer = buffer.number,
-		silent = true,
+			keymap("n", "<CR>", function()
+				vim.api.nvim_del_autocmd(setup.highlight_autocmd_id)
+				select_stream(setup.selections, group)
+			end, {
+				buffer = buffer.number,
+			})
+			keymap("n", "q", navigation.pop, { buffer = buffer.number, silent = true })
+			keymap("n", "t", function()
+				select_stream(setup.selections, group, "tail")
+			end, {
+				buffer = buffer.number,
+				silent = true,
+			})
+			keymap("n", "r", function()
+				M.list_streams(group)
+			end, {
+				buffer = buffer.number,
+				silent = true,
+			})
+		end,
 	})
 end
 
 function M.tail(group, stream)
 	buffer.clear()
+	buffer.set_lines({ "Loading..." })
 
 	local winnr = vim.fn.bufwinid(buffer.number)
 
@@ -143,8 +164,13 @@ function M.tail(group, stream)
 	end
 	command = command .. string.format("' --profile %s -b%s", config.values.profile, config.values.tail_begin)
 
+	local first_print = true
 	vim.fn.jobstart(command, {
 		on_stdout = function(_, data, _)
+			if first_print then
+				buffer.clear()
+				first_print = false
+			end
 			buffer.append_lines(data)
 			local line_count = vim.api.nvim_buf_line_count(buffer.number)
 			vim.api.nvim_win_set_cursor(winnr, { line_count, 1 })
@@ -156,6 +182,7 @@ end
 
 function M.tail_and_follow(group, stream)
 	buffer.clear()
+	buffer.set_lines({ "Loading or waiting for new logs..." })
 
 	local winnr = vim.fn.bufwinid(buffer.number)
 
@@ -165,8 +192,13 @@ function M.tail_and_follow(group, stream)
 	end
 	command = command .. string.format("' --profile %s", config.values.profile)
 
+	local first_print = true
 	local job_id = vim.fn.jobstart(command, {
 		on_stdout = function(_, data, _)
+			if first_print then
+				buffer.clear()
+				first_print = false
+			end
 			buffer.append_lines(data)
 			local line_count = vim.api.nvim_buf_line_count(buffer.number)
 			vim.api.nvim_win_set_cursor(winnr, { line_count, 1 })
