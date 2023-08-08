@@ -28,6 +28,7 @@ An options table can be passed to the setup function. Valid options are below:
 - `profile` string - Changes which AWS profile is used by default. Default: default
 - `wrap` boolean - Whether to wrap text in the overlay. Default: false
 - `tail_begin` string - Date/time or human-friendly string to indicate when to start tail, refer to [cw](https://github.com/lucagrulla/cw) for examples. Default: 1h
+- `show_timestamp` boolean - Whether to show the timestamp before each log entry. Default: false
 
 ## Commands
 

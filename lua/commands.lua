@@ -81,7 +81,6 @@ function M.list_groups()
 			end
 		end,
 		on_exit = function()
-			print(vim.inspect(command_output))
 			buffer.clear()
 			local setup = setup_selections(command_output, {})
 			keymap("n", "<CR>", function()
@@ -163,6 +162,9 @@ function M.tail(group, stream)
 		command = command .. string.format(":%s", stream)
 	end
 	command = command .. string.format("' --profile %s -b%s", config.values.profile, config.values.tail_begin)
+	if config.values.show_timestamp then
+		command = command .. " -t"
+	end
 
 	local first_print = true
 	local job_id = vim.fn.jobstart(command, {
@@ -195,6 +197,9 @@ function M.tail_and_follow(group, stream)
 		command = command .. string.format(":%s", stream)
 	end
 	command = command .. string.format("' --profile %s", config.values.profile)
+	if config.values.show_timestamp then
+		command = command .. " -t"
+	end
 
 	local first_print = true
 	local job_id = vim.fn.jobstart(command, {

@@ -11,6 +11,7 @@ function M.set_with_defaults(options)
 		profile = options.profile or "default",
 		wrap = options.wrap or false,
 		tail_begin = options.tail_begin or "1h",
+		show_timestamp = options.show_timestamp or false,
 	}
 end
 
