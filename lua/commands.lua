@@ -165,7 +165,7 @@ function M.tail(group, stream)
 	command = command .. string.format("' --profile %s -b%s", config.values.profile, config.values.tail_begin)
 
 	local first_print = true
-	vim.fn.jobstart(command, {
+	local job_id = vim.fn.jobstart(command, {
 		on_stdout = function(_, data, _)
 			if first_print then
 				buffer.clear()
@@ -177,7 +177,11 @@ function M.tail(group, stream)
 		end,
 	})
 
-	keymap("n", "q", navigation.pop, { buffer = buffer.number, silent = true })
+	keymap("n", "q", function()
+		first_print = false
+		vim.api.nvim_call_function("jobstop", { job_id })
+		navigation.pop()
+	end, { buffer = buffer.number, silent = true })
 end
 
 function M.tail_and_follow(group, stream)
